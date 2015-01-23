@@ -26,6 +26,6 @@ The options are:
 # Credits
 [Neel Shah](shah.neel@nyu.edu) for inspiring me to write wordpress plugin.
 
-## Documentation, FAQs, and More
+## Documentation
 
-Coming Soon.
+Please visit, [Documentation](http://sanghviharshit.github.io/WP-Custom-New-User/doc)
