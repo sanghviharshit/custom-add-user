@@ -7,7 +7,7 @@
  * and defines a function that starts the plugin.
  *
  * @link              http://about.me/harshit
- * @package Custom_User_New
+ * @package Custom-User-New
  * @author Harshit Sanghvi {@link http://github.com/sanghviharshit}
  * @license GNU General Public License (Version 2 - GPLv2) {@link http://www.gnu.org/licenses/gpl-2.0.html}
  *
@@ -89,7 +89,7 @@ class Custom_User_New {
      * @return void
      */
     function load_plugin_textdomain() {
-        load_plugin_textdomain( $this->text_domain, null, dirname( plugin_basename( __FILE__ ) ) . '/custom-user-new-files/languages/' );
+        load_plugin_textdomain( $this->text_domain, null, dirname( plugin_basename( __FILE__ ) ) . '/includes/languages/' );
     }
 
     /**
@@ -147,7 +147,7 @@ class Custom_User_New {
      * @return void
      */
     function output_user_new_page( $network = '' ) {
-        require_once( $this->plugin_dir . "custom-user-new-files/user-new.php" );
+        require_once( $this->plugin_dir . "includes/user-new.php" );
     }
 
     /**

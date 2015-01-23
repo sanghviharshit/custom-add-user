@@ -2,7 +2,7 @@
 /**
  * New User Administration Screen.
  *
- * @package Custom_User_New
+ * @package Custom-User-New
  * @subpackage Includes
  */
 
