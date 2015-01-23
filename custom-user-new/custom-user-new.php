@@ -18,7 +18,7 @@
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
  * License: GPL2
- * Version: 0.0.1
+ * Version: 0.1.0
  */
 
 // If this file is called directly, abort.
