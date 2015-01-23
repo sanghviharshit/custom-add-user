@@ -1,3 +1,4 @@
 # Changelog
 
-* (22 January 2014). Initial Release
+* (23 January 2015). Added Network Settings Page.
+* (22 January 2015). Initial Release
