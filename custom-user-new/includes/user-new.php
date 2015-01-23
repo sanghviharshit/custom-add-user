@@ -287,10 +287,6 @@ if ( is_multisite() ) {
             </select>
         </td>
     </tr>
-    <tr>
-        <th scope="row"><label for="adduser-noconfirmation"><?php _e('Skip Confirmation Email') ?></label></th>
-        <td><label for="adduser-noconfirmation"><input type="checkbox" name="noconfirmation" id="adduser-noconfirmation" value="1" checked onclick="return false" /> <?php _e( 'Add the user without sending an email that requires their confirmation.' ); ?></label></td>
-    </tr>
 </table>
 <?php
 /**
@@ -331,7 +327,7 @@ $new_user_email = $creating && isset( $_POST['email'] ) ? wp_unslash( $_POST['em
 $new_user_uri = $creating && isset( $_POST['url'] ) ? wp_unslash( $_POST['url'] ) : '';
 $new_user_role = $creating && isset( $_POST['role'] ) ? wp_unslash( $_POST['role'] ) : '';
 $new_user_send_password = $creating && isset( $_POST['send_password'] ) ? wp_unslash( $_POST['send_password'] ) : '';
-$new_user_ignore_pass = $creating && isset( $_POST['noconfirmation'] ) ? wp_unslash( $_POST['noconfirmation'] ) : '';
+$new_user_ignore_pass = $creating ? '1' : '';
 
 ?>
 <table class="form-table">
@@ -397,10 +393,6 @@ if ( apply_filters( 'show_password_fields', true ) ) : ?>
             ?>
             </select>
         </td>
-    </tr>
-    <tr>
-        <th scope="row"><label for="noconfirmation"><?php _e('Skip Confirmation Email') ?></label></th>
-        <td><label for="noconfirmation"><input type="checkbox" name="noconfirmation" id="noconfirmation" value="1" checked onclick="return false" /> <?php _e( 'Add the user without sending an email that requires their confirmation.' ); ?></label></td>
     </tr>
 </table>
 
