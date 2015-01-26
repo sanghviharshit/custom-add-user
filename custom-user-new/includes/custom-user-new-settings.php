@@ -61,7 +61,7 @@
                     </table>
 -->
                     <p class="submit">
-                        <?php wp_nonce_field('submit_settings_network'); ?>
+                        <?php wp_nonce_field('cun_submit_settings_network'); ?>
                         <input type="submit" name="submit" class="button-primary" value="<?php _e( 'Save Changes', $this->text_domain ); ?>" />
                     </p>
 
@@ -113,7 +113,7 @@
                     </table>
 
                     <p class="submit">
-                        <?php wp_nonce_field('submit_settings'); ?>
+                        <?php wp_nonce_field('cun_submit_settings'); ?>
                         <input type="submit" name="submit" class="button-primary" value="<?php _e( 'Save Changes', $this->text_domain ); ?>" />
                     </p>
                 </form>
