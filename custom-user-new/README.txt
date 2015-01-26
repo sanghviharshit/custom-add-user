@@ -3,7 +3,7 @@ Donate link: https://github.com/sanghviharshit/
 Tags: custom, user, new, existing, add, promote
 Requires at least: 3.0.1
 Tested up to: 4.1
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,6 +54,9 @@ Not yet available.
 
 == Changelog ==
 
+= 0.1.1 =
+* Minimized custom code.
+
 = 0.1.0 =
 * Network Settigns page.
 
@@ -61,6 +64,9 @@ Not yet available.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 0.1.1 =
+* To make it more reliable against future core updates.
 
 = 0.1.0 =
 * Upgrade to display network settings page.
