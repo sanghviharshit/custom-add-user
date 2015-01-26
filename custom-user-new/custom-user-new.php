@@ -6,14 +6,14 @@
  * Dashboard. This file also includes all of the dependencies used by the plugin,
  * and defines a function that starts the plugin.
  *
- * @link              http://about.me/harshit
+ * @link http://about.me/harshit
  * @package Custom-User-New
  * @author Harshit Sanghvi {@link http://github.com/sanghviharshit}
  * @license GNU General Public License (Version 2 - GPLv2) {@link http://www.gnu.org/licenses/gpl-2.0.html}
  *
  * @wordpress-plugin
  * Plugin Name: Custom New User Page
- * Description: Replaces existing Add Users page in site dashboard and allows to add users without sending an email confirmation to new users. Also adds custom text below add user form.
+ * Description: Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
  * Plugin URI: http://github.com/sanghviharshit
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
@@ -67,9 +67,10 @@ class Custom_User_New {
      */
     function init() {
         add_action( 'admin_init', array( $this, 'handle_page_requests' ) );
-        add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        //add_action( 'admin_menu', array( $this, 'admin_menu' ) );
         add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ) );
         add_action( 'user_new_form', array( $this , 'custom_content_below_add_user_form' ) );
+        add_action( 'admin_action_createuser', array( $this , 'custom_createuser' ) );
     }
 
     /**
@@ -114,7 +115,7 @@ class Custom_User_New {
 
     /**
      * Add Google Analytics options page.
-     *
+     * 
      * @return void
      */
     function admin_menu() {
@@ -122,6 +123,10 @@ class Custom_User_New {
         global $submenu;
 
         //unset($submenu['users.php'][10]);
+
+        /** 
+        * @todo remove, not used
+        */
 
         if ( current_user_can('create_users') )
             $submenu['users.php'][10] = array(_x('Add New', 'user'), 'create_users', 'admin.php?page='.CUN_PAGE_SLUG);
@@ -185,7 +190,7 @@ class Custom_User_New {
      * @return void
      */
     function output_user_new_page( $network = '' ) {
-        require_once( $this->plugin_dir . "includes/custom-user-new.php" );
+        //require_once( $this->plugin_dir . "includes/custom-user-new.php" );
     }
 
     /**
@@ -203,6 +208,65 @@ class Custom_User_New {
         echo $cun_instructions;
     } 
 
+
+    /**
+    * Creates/Adds user without email confirmation.
+    *
+    * @access public
+    */
+    public function custom_createuser() {
+
+        if ( isset($_REQUEST['action']) && 'createuser' == $_REQUEST['action'] ) {
+
+            check_admin_referer( 'create-user', '_wpnonce_create-user' );
+
+            if ( ! current_user_can('create_users') )
+                wp_die(__('Cheatin&#8217; uh?'));
+
+            if ( ! is_multisite() ) {
+                $user_id = edit_user();
+
+                if ( is_wp_error( $user_id ) ) {
+                    $add_user_errors = $user_id;
+                } else {
+                    if ( current_user_can( 'list_users' ) )
+                        $redirect = 'users.php?update=add&id=' . $user_id;
+                    else
+                        $redirect = add_query_arg( 'update', 'add', 'user-new.php' );
+                    wp_redirect( $redirect );
+                    die();
+                }
+            } else {
+                    // Adding a new user to this site
+                $user_details = wpmu_validate_user_signup( $_REQUEST[ 'user_login' ], $_REQUEST[ 'email' ] );
+                if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
+                    $add_user_errors = $user_details[ 'errors' ];
+                } else {
+                    /**
+                     * Filter the user_login, also known as the username, before it is added to the site.
+                     *
+                     * @since 2.0.3
+                     *
+                     * @param string $user_login The sanitized username.
+                     */
+                    global $wpdb;
+                    $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
+                    add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
+                    //echo "Adding User";
+                    wpmu_signup_user( $new_user_login, $_REQUEST[ 'email' ], array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
+                    $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
+                    wpmu_activate_signup( $key );
+                    $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
+        
+                    wp_redirect( $redirect );
+                    //echo "redirected";
+                    exit();
+                    //echo "exit";
+                }
+            }
+        }
+    } 
+
     /**
      * Update Custom New User plugin settings into DB.
      *
@@ -211,14 +275,14 @@ class Custom_User_New {
     function handle_page_requests() {
         if ( isset( $_POST['submit'] ) ) {
 
-            if ( wp_verify_nonce( $_POST['_wpnonce'], 'submit_settings_network' ) ) {
+            if ( wp_verify_nonce( $_POST['_wpnonce'], 'cun_submit_settings_network' ) ) {
             //save network settings
                 $this->save_options( array('cun_settings' => $_POST), 'network' );
 
                 wp_redirect( add_query_arg( array( 'page' => 'custom-user-new-settings', 'dmsg' => urlencode( __( 'Changes were saved!', $this->text_domain ) ) ), 'settings.php' ) );
                 exit;
             }
-            elseif ( wp_verify_nonce( $_POST['_wpnonce'], 'submit_settings' ) ) {
+            elseif ( wp_verify_nonce( $_POST['_wpnonce'], 'cun_submit_settings' ) ) {
             //save settings
 
                 $this->save_options( array('cun_settings' => $_POST) );

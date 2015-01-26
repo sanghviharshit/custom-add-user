@@ -1,5 +1,4 @@
-=== Custom New User ===
-Contributors: harshit_ps
+Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
 Donate link: https://github.com/sanghviharshit/
 Tags: custom, user, new, existing, add, promote
 Requires at least: 3.0.1
@@ -12,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Replaces existing Add Users page in site dashboard and allows site admins to add users without sending an email confirmation to new users. Also adds custom text below add user form.
+Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
 
 == Installation ==
 

@@ -1,5 +1,10 @@
 # WP-Custom-New-User
-[WordPress] Replaces existing Add Users page in site dashboard and allows site admins to add users without sending an email confirmation to new users. Also adds custom text below add user form.
+[WordPress] Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
+
+When a user tries to add another user to a site, an invitation gets sent to the invited user. When that invitation expires, the invited user cannot be added to a site for a time period as their username is on hold, which creates a lot of frustration for both - the user trying to add people to their site and users trying to access said site.
+
+This plugin removes the invitation (activation link) and automatically adds the user to the site. It also send out a notification to the user indicating that they have been added to that site with a link to access it. 
+
 
 ## Installation
 
