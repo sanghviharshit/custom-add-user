@@ -5,6 +5,8 @@ When a user tries to add another user to a site, an invitation gets sent to the 
 
 This plugin removes the invitation (activation link) and automatically adds the user to the site. It also send out a notification to the user indicating that they have been added to that site with a link to access it. 
 
+It also overrides WordPress's default restrictions for Username and enforces site admins to add users with username as email id in configurable list of domains (e.g. gmail.com, nyu.edu, etc). Only Super admins can bypass this restrictions.
+
 
 ## Installation
 

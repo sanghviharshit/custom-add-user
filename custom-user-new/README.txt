@@ -1,9 +1,9 @@
-Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
+Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form. And overrides username restrictions.
 Donate link: https://github.com/sanghviharshit/
 Tags: custom, user, new, existing, add, promote
 Requires at least: 3.0.1
 Tested up to: 4.1
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,6 +12,13 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 == Description ==
 
 Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
+
+When a user tries to add another user to a site, an invitation gets sent to the invited user. When that invitation expires, the invited user cannot be added to a site for a time period as their username is on hold, which creates a lot of frustration for both - the user trying to add people to their site and users trying to access said site.
+
+This plugin removes the invitation (activation link) and automatically adds the user to the site. It also send out a notification to the user indicating that they have been added to that site with a link to access it. 
+
+It also overrides WordPress's default restrictions for Username and enforces site admins to add users with username as email id in configured domains (e.g. gmail.com, nyu.edu, etc). Only Super admins can bypass this restrictions.
+
 
 == Installation ==
 
@@ -54,6 +61,9 @@ Not yet available.
 
 == Changelog ==
 
+= 0.1.2 =
+* Restricts usernames as email address in configurable list of domains.
+
 = 0.1.1 =
 * Minimized custom code.
 
@@ -64,6 +74,9 @@ Not yet available.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 0.1.2 =
+* To restrict usernames as email address in configurable list of domains.
 
 = 0.1.1 =
 * To make it more reliable against future core updates.
