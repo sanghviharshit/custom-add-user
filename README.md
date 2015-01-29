@@ -29,6 +29,7 @@ The options are:
 4. Upload the zip file and click Install Now.
 5. Click on *Network Activate.*
 
+> Note: After activating the plugin, go to `Network Dashboard` -> `Settings` -> `Custom New User` and configure allowed list of domains in email id as username. You can also customize error message for invalid username.
 
 # Credits
 [Neel Shah](shah.neel@nyu.edu) for inspiring me to write wordpress plugin.

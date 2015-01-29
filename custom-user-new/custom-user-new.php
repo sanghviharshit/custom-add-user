@@ -18,7 +18,7 @@
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
  * License: GPL2
- * Version: 0.1.2
+ * Version: 0.1.3
  */
 
 // If this file is called directly, abort.
@@ -275,9 +275,16 @@ class Custom_User_New {
      * @return bool
      */
     private function allowed_email_domain($email) {
+    	if(!is_email($email)) {
+    		return false;
+		}
 		$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
 		$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
 
+		//Domains not configured, allow all
+		if(empty($allowed_domains_db)) {
+			return true;
+		}
 		$allowed_domains = explode(",", $allowed_domains_db);
 		
 		$domain_in_email = strtolower(array_pop(explode('@', $email)));
@@ -338,7 +345,17 @@ class Custom_User_New {
 						if ($message == __('Only lowercase letters (a-z) and numbers are allowed.')) {
 							if (is_email($username)) {
 								if(!is_super_admin() && !$this->allowed_email_domain($_REQUEST[ 'user_login' ])) {
-									$message = 'Sorry, Username must be @nyu.edu email address.';
+									$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
+									$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
+									$allowed_domains_db = str_replace(',', '/', $allowed_domains_db);
+
+									$error_message = stripslashes($this->network_settings['cun_settings']['cun_settings_username_error']);
+									if(empty($error_message)) {
+										$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';	
+									}
+									else {
+										$message = $error_message;
+									}
 									$new_errors->add($code, $message);
 								}
 							}
@@ -359,12 +376,19 @@ class Custom_User_New {
 					}
 				}
 			}
-		} else if (!is_super_admin() && !is_email($username)) {
+		} else if (!is_super_admin() && !$this->allowed_email_domain($_REQUEST[ 'user_login' ])) {
 			$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
 			$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
 			$allowed_domains_db = str_replace(',', '/', $allowed_domains_db);
 
-			$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';
+			$error_message = stripslashes($this->network_settings['cun_settings']['cun_settings_username_error']);
+			if(empty($error_message)) {
+				$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';	
+			}
+			else {
+				$message = $error_message;
+			}
+
 			$new_errors->add($code, $message);
 
 		} else {
