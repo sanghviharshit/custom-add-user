@@ -45,21 +45,21 @@
 -->
 
                     </table>
-<!--
-                    <h3 class="title nse-playlist-settings"><?php _e( 'NYU Stream Embed Settings for Playlist', $this->text_domain ) ?></h3>
 
-                    <table class="form-table nse-playlist-settings">
+                    <h3 class="title nse-playlist-settings"><?php _e( 'Username Override Settings.', $this->text_domain ) ?></h3>
 
-                        <tr class="nse-playlist-settings" valign="top">
-                            <th scope="row"><?php _e( 'iframe src', $this->text_domain ); ?></th>
+                    <table class="form-table cun-settings-username">
+
+                        <tr class="cun-settings-username" valign="top">
+                            <th scope="row"><?php _e( 'Domains for Email Address', $this->text_domain ); ?></th>
                             <td>
-                                <textarea name="nse_settings_playlist_src" rows="5" cols="60"><?php if ( !empty( $this->current_settings['nse_settings']['nse_settings_playlist_src'] ) ) { echo $this->current_settings['nse_settings']['nse_settings_playlist_src']; } ?></textarea>
-                                <p class="description"><?php _e( 'src from iframe embed code for playlist. e.g. https://cdnapisec.kaltura.com/p/1674401/sp/167440100/embedIframeJs/uiconf_id/23437711/partner_id/1674401/widget_id/1_zh8d6z1g?iframeembed=true&playerId=kaltura_player_1390404249&flashvars[playlistAPI.autoContinue]=true&flashvars[playlistAPI.autoInsert]=true&flashvars[ks]=&flashvars[playlistAPI.kpl0Id]=', $this->text_domain ); ?></p>
+                                <input type="text" name="cun_settings_username_domain" class="regular-text" <?php if ( !empty( $this->current_settings['cun_settings']['cun_settings_username_domain'] ) ) { echo "value='".strtolower(stripslashes($this->current_settings['cun_settings']['cun_settings_username_domain']))."'"; } ?> />
+                                <p class="description"><?php _e( 'Comma-separated list of allowed domains for email-id as username. e.g. nyu.edu, poly.edu', $this->text_domain ); ?></p>
                             </td>
                         </tr>
 
                     </table>
--->
+
                     <p class="submit">
                         <?php wp_nonce_field('cun_submit_settings_network'); ?>
                         <input type="submit" name="submit" class="button-primary" value="<?php _e( 'Save Changes', $this->text_domain ); ?>" />
