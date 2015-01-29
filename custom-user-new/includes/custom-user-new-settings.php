@@ -58,6 +58,14 @@
                             </td>
                         </tr>
 
+                        <tr class="cun-settings-username-error" valign="top">
+                            <th scope="row"><?php _e( 'Error message for invalid username.', $this->text_domain ); ?></th>
+                            <td>
+                                <input type="text" name="cun_settings_username_error" class="regular-text" <?php if ( !empty( $this->current_settings['cun_settings']['cun_settings_username_error'] ) ) { echo "value='".strtolower(stripslashes($this->current_settings['cun_settings']['cun_settings_username_error']))."'"; } ?> />
+                                <p class="description"><?php _e( 'Error message that should be displayed to admin when invalid username is entered', $this->text_domain ); ?></p>
+                            </td>
+                        </tr>
+
                     </table>
 
                     <p class="submit">
