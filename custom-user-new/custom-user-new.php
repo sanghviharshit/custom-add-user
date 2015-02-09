@@ -71,6 +71,8 @@ class Custom_User_New {
         add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ) );
         add_action( 'user_new_form', array( $this , 'custom_content_below_add_user_form' ) );
         add_action( 'admin_action_createuser', array( $this , 'custom_createuser' ) );
+        add_action( 'admin_action_adduser', array( $this , 'custom_adduser' ) );
+
         add_filter( 'wpmu_validate_user_signup', array($this, 'validate_username'));
     }
 
@@ -211,61 +213,100 @@ class Custom_User_New {
 
 
     /**
-    * Creates/Adds user without email confirmation.
+    * Creates user without email confirmation.
     *
     * @access public
     */
     public function custom_createuser() {
+        global $wpdb;
+        check_admin_referer( 'create-user', '_wpnonce_create-user' );
 
-        if ( isset($_REQUEST['action']) && 'createuser' == $_REQUEST['action'] ) {
+        if ( ! current_user_can('create_users') )
+            wp_die(__('Cheatin&#8217; uh?'));
 
-            check_admin_referer( 'create-user', '_wpnonce_create-user' );
+        if ( ! is_multisite() ) {
+            $user_id = edit_user();
 
-            if ( ! current_user_can('create_users') )
-                wp_die(__('Cheatin&#8217; uh?'));
-
-            if ( ! is_multisite() ) {
-                $user_id = edit_user();
-
-                if ( is_wp_error( $user_id ) ) {
-                    $add_user_errors = $user_id;
-                } else {
-                    if ( current_user_can( 'list_users' ) )
-                        $redirect = 'users.php?update=add&id=' . $user_id;
-                    else
-                        $redirect = add_query_arg( 'update', 'add', 'user-new.php' );
-                    wp_redirect( $redirect );
-                    die();
-                }
+            if ( is_wp_error( $user_id ) ) {
+                $add_user_errors = $user_id;
             } else {
-                // Adding a new user to this site
-                $user_details = wpmu_validate_user_signup( $_REQUEST[ 'user_login' ], $_REQUEST[ 'email' ] );
-                if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
-                    $add_user_errors = $user_details[ 'errors' ];
-                } else {
-					/**
-					 * Filter the user_login, also known as the username, before it is added to the site.
-					 *
-					 * @since 2.0.3
-					 *
-					 * @param string $user_login The sanitized username.
-					 */
-					$new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
+                if ( current_user_can( 'list_users' ) )
+                    $redirect = 'users.php?update=add&id=' . $user_id;
+                else
+                    $redirect = add_query_arg( 'update', 'add', 'user-new.php' );
+                wp_redirect( $redirect );
+                die();
+            }
+        } else {
+            // Adding a new user to this site
+            $user_details = wpmu_validate_user_signup( $_REQUEST[ 'user_login' ], $_REQUEST[ 'email' ] );
+            if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
+                $add_user_errors = $user_details[ 'errors' ];
+            } else {
+				/**
+				 * Filter the user_login, also known as the username, before it is added to the site.
+				 *
+				 * @since 2.0.3
+				 *
+				 * @param string $user_login The sanitized username.
+				 */
+                $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
+                
+                add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
 
-	                global $wpdb;
-
-	                $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
-	                add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
-
-	                wpmu_signup_user( $new_user_login, $_REQUEST[ 'email' ], array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
-	                $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
-	                wpmu_activate_signup( $key );
-	                $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
-	                wp_redirect( $redirect );
-	                exit();
-				}
-        	}
+                wpmu_signup_user( $new_user_login, $_REQUEST[ 'email' ], array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
+                $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
+                wpmu_activate_signup( $key );
+                $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
+                wp_redirect( $redirect );
+                exit();
+			}
     	}
+    }
+
+    /**
+    * Adds existing user without email confirmation.
+    *
+    * @access public
+    */
+    public function custom_adduser() {
+
+        global $wpdb;
+        check_admin_referer( 'add-user', '_wpnonce_add-user' );
+
+        $user_details = null;
+        if ( false !== strpos($_REQUEST[ 'email' ], '@') ) {
+            $user_details = get_user_by('email', $_REQUEST[ 'email' ]);
+        } else {
+            if ( is_super_admin() ) {
+                $user_details = get_user_by('login', $_REQUEST[ 'email' ]);
+            } else {
+                wp_redirect( add_query_arg( array('update' => 'enter_email'), 'user-new.php' ) );
+                die();
+            }
+        }
+
+        if ( !$user_details ) {
+            wp_redirect( add_query_arg( array('update' => 'does_not_exist'), 'user-new.php' ) );
+            die();
+        }
+
+        if ( ! current_user_can('promote_user', $user_details->ID) )
+            wp_die(__('Cheatin&#8217; uh?'));
+
+        // Adding an existing user to this blog
+        $new_user_email = $user_details->user_email;
+        $redirect = 'user-new.php';
+        $username = $user_details->user_login;
+        $user_id = $user_details->ID;
+        if ( ( $username != null && !is_super_admin( $user_id ) ) && ( array_key_exists($blog_id, get_blogs_of_user($user_id)) ) ) {
+            $redirect = add_query_arg( array('update' => 'addexisting'), 'user-new.php' );
+        } else {
+            add_existing_user_to_blog( array( 'user_id' => $user_id, 'role' => $_REQUEST[ 'role' ] ) );
+            $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
+        }
+        wp_redirect( $redirect );
+        die();
     }
 
 
