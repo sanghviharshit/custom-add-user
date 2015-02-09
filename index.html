@@ -31,7 +31,13 @@
         <h1>
 <a id="wp-custom-new-user" class="anchor" href="#wp-custom-new-user" aria-hidden="true"><span class="octicon octicon-link"></span></a>WP-Custom-New-User</h1>
 
-<p>[WordPress] Replaces existing Add Users page in site dashboard and allows site admins to add users without sending an email confirmation to new users. Also adds custom text below add user form.</p>
+<p>[WordPress] Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.</p>
+
+<p>When a user tries to add another user to a site, an invitation gets sent to the invited user. When that invitation expires, the invited user cannot be added to a site for a time period as their username is on hold, which creates a lot of frustration for both - the user trying to add people to their site and users trying to access said site.</p>
+
+<p>This plugin removes the invitation (activation link) and automatically adds the user to the site. It also send out a notification to the user indicating that they have been added to that site with a link to access it. </p>
+
+<p>It also overrides WordPress's default restrictions for Username and enforces site admins to add users with username as email id in configurable list of domains (e.g. gmail.com, nyu.edu, etc). Only Super admins can bypass this restrictions.</p>
 
 <h2>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
@@ -64,7 +70,7 @@
 </ol>
 
 <blockquote>
-<p>Note: After activating the plugin, go to <code>Network Dashboard</code> -&gt; <code>Settings</code> -&gt; <code>Custom New User</code> and configure allowed list of domains in email id as username.</p>
+<p>Note: After activating the plugin, go to <code>Network Dashboard</code> -&gt; <code>Settings</code> -&gt; <code>Custom New User</code> and configure allowed list of domains in email id as username. You can also customize error message for invalid username.</p>
 </blockquote>
 
 <h1>
@@ -83,6 +89,16 @@
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-59542024-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
