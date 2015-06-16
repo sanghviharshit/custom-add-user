@@ -1,5 +1,7 @@
 # Changelog
 
+
+* (16 June 2015). Cleaned up obsolete code.
 * (09 February 2015). Add existing user without confirmation.
 * (29 January 2015). Configurable error message.
 * (28 January 2015). Restrict username with email id in configured domains.
