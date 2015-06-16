@@ -3,7 +3,7 @@ Donate link: https://github.com/sanghviharshit/
 Tags: custom, user, new, existing, add, promote
 Requires at least: 3.0.1
 Tested up to: 4.1
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,9 @@ Make Pull requests to github repository.
 Not yet available.
 
 == Changelog ==
+
+= 0.1.5 =
+* Cleaned up obsolete code.
 
 = 0.1.4 =
 * Add existing user without confirmation.
