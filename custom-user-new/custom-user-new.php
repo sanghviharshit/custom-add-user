@@ -67,13 +67,12 @@ class Custom_User_New {
      */
     function init() {
         add_action( 'admin_init', array( $this, 'handle_page_requests' ) );
-        //add_action( 'admin_menu', array( $this, 'admin_menu' ) );
         add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ) );
         add_action( 'user_new_form', array( $this , 'custom_content_below_add_user_form' ) );
         add_action( 'admin_action_createuser', array( $this , 'custom_createuser' ) );
         add_action( 'admin_action_adduser', array( $this , 'custom_adduser' ) );
 
-        add_filter( 'wpmu_validate_user_signup', array($this, 'validate_username'));
+        
     }
 
     /**
@@ -117,44 +116,13 @@ class Custom_User_New {
     }
 
     /**
-     * Add Google Analytics options page.
-     * 
-     * @return void
-     */
-    function admin_menu() {
-        global $menu;
-        global $submenu;
-
-        //unset($submenu['users.php'][10]);
-
-        /** 
-        * @todo remove, not used
-        */
-
-        if ( current_user_can('create_users') )
-            $submenu['users.php'][10] = array(_x('Add New', 'user'), 'create_users', 'admin.php?page='.CUN_PAGE_SLUG);
-        else
-            $submenu['users.php'][10] = array(_x('Add New', 'user'), 'promote_users', 'admin.php?page='.CUN_PAGE_SLUG);
-
-
-        add_submenu_page( 
-                null, 
-                'Add New User',
-                'Add New User',
-                'promote_users', 
-                CUN_PAGE_SLUG,
-                array( &$this, 'output_user_new_page' ) );
-
-    }
-
-    /**
      * Add network admin menu
      *
      * @access public
      * @return void
      */
     function network_admin_menu() {
-        add_submenu_page( 'settings.php', 'Custom New User', 'Custom New User', 'manage_network', 'custom-user-new-settings', array( $this, 'output_network_settings_page' ) );
+        add_submenu_page( 'settings.php', 'Add User Instructions', 'Add User Instructions', 'manage_network', 'custom-user-new-settings', array( $this, 'output_network_settings_page' ) );
     }
 
     /**
@@ -176,28 +144,9 @@ class Custom_User_New {
         require_once( $this->plugin_dir . "includes/custom-user-new-settings.php" );
     }
 
-    /**
-     * Network add user page
-     *
-     * @access public
-     * @return void
-     */
-    function output_network_user_new_page() {
-        /* Get Network settings */
-        $this->output_user_new_page( 'network' );
-    }
 
     /**
-     * Admin Users->add user page output
-     *
-     * @return void
-     */
-    function output_user_new_page( $network = '' ) {
-        //require_once( $this->plugin_dir . "includes/custom-user-new.php" );
-    }
-
-    /**
-    * Adds Custom text on add users page below add user form.
+    * Adds Custom text on add user page below add user form.
     *
     * @access public
     */
@@ -212,130 +161,6 @@ class Custom_User_New {
     } 
 
 
-    /**
-    * Creates user without email confirmation.
-    *
-    * @access public
-    */
-    public function custom_createuser() {
-        global $wpdb;
-        check_admin_referer( 'create-user', '_wpnonce_create-user' );
-
-        if ( ! current_user_can('create_users') )
-            wp_die(__('Cheatin&#8217; uh?'));
-
-        if ( ! is_multisite() ) {
-            $user_id = edit_user();
-
-            if ( is_wp_error( $user_id ) ) {
-                $add_user_errors = $user_id;
-            } else {
-                if ( current_user_can( 'list_users' ) )
-                    $redirect = 'users.php?update=add&id=' . $user_id;
-                else
-                    $redirect = add_query_arg( 'update', 'add', 'user-new.php' );
-                wp_redirect( $redirect );
-                die();
-            }
-        } else {
-            // Adding a new user to this site
-            $user_details = wpmu_validate_user_signup( $_REQUEST[ 'user_login' ], $_REQUEST[ 'email' ] );
-            if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
-                $add_user_errors = $user_details[ 'errors' ];
-            } else {
-				/**
-				 * Filter the user_login, also known as the username, before it is added to the site.
-				 *
-				 * @since 2.0.3
-				 *
-				 * @param string $user_login The sanitized username.
-				 */
-                $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
-                
-                add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
-
-                wpmu_signup_user( $new_user_login, $_REQUEST[ 'email' ], array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
-                $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
-                wpmu_activate_signup( $key );
-                $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
-                wp_redirect( $redirect );
-                exit();
-			}
-    	}
-    }
-
-    /**
-    * Adds existing user without email confirmation.
-    *
-    * @access public
-    */
-    public function custom_adduser() {
-
-        global $wpdb;
-        check_admin_referer( 'add-user', '_wpnonce_add-user' );
-
-        $user_details = null;
-        if ( false !== strpos($_REQUEST[ 'email' ], '@') ) {
-            $user_details = get_user_by('email', $_REQUEST[ 'email' ]);
-        } else {
-            if ( is_super_admin() ) {
-                $user_details = get_user_by('login', $_REQUEST[ 'email' ]);
-            } else {
-                wp_redirect( add_query_arg( array('update' => 'enter_email'), 'user-new.php' ) );
-                die();
-            }
-        }
-
-        if ( !$user_details ) {
-            wp_redirect( add_query_arg( array('update' => 'does_not_exist'), 'user-new.php' ) );
-            die();
-        }
-
-        if ( ! current_user_can('promote_user', $user_details->ID) )
-            wp_die(__('Cheatin&#8217; uh?'));
-
-        // Adding an existing user to this blog
-        $new_user_email = $user_details->user_email;
-        $redirect = 'user-new.php';
-        $username = $user_details->user_login;
-        $user_id = $user_details->ID;
-        if ( ( $username != null && !is_super_admin( $user_id ) ) && ( array_key_exists($blog_id, get_blogs_of_user($user_id)) ) ) {
-            $redirect = add_query_arg( array('update' => 'addexisting'), 'user-new.php' );
-        } else {
-            add_existing_user_to_blog( array( 'user_id' => $user_id, 'role' => $_REQUEST[ 'role' ] ) );
-            $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
-        }
-        wp_redirect( $redirect );
-        die();
-    }
-
-
-	/**
-     * Check if email address is from allowed domains.
-     *
-     * @return bool
-     */
-    private function allowed_email_domain($email) {
-    	if(!is_email($email)) {
-    		return false;
-		}
-		$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
-		$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
-
-		//Domains not configured, allow all
-		if(empty($allowed_domains_db)) {
-			return true;
-		}
-		$allowed_domains = explode(",", $allowed_domains_db);
-		
-		$domain_in_email = strtolower(array_pop(explode('@', $email)));
-		
-		if ( ! in_array($domain_in_email, $allowed_domains)) {
-			return false;
-		}
-		return true;
-
-    }
     /**
      * Update Custom New User plugin settings into DB.
      *
@@ -361,98 +186,6 @@ class Custom_User_New {
             }
         }
     }
-
-
-	/*
-	 * Override errors generated by WordPress due to network username
-	 * restrictions that are sort of insane.
-	 */
-	function validate_username($result) {
-
-		$username = $result['user_name'];
-
-		// Copy any error messages that have not been overridden
-		$new_errors = new WP_Error();
-
-		if(is_wp_error( $result[ 'errors' ] ) && !empty( $result[ 'errors' ]->errors )) {
-			$errors = $result['errors'];
-			$codes = $errors->get_error_codes();
-
-			foreach ($codes as $code) {
-				$messages = $errors->get_error_messages($code);
-
-				if ($code == 'user_name') {
-					foreach ($messages as $message) {
-						if ($message == __('Only lowercase letters (a-z) and numbers are allowed.')) {
-							if (is_email($username)) {
-								if(!is_super_admin() && !$this->allowed_email_domain($_REQUEST[ 'user_login' ])) {
-									$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
-									$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
-									$allowed_domains_db = str_replace(',', '/', $allowed_domains_db);
-
-									$error_message = stripslashes($this->network_settings['cun_settings']['cun_settings_username_error']);
-									if(empty($error_message)) {
-										$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';	
-									}
-									else {
-										$message = $error_message;
-									}
-									$new_errors->add($code, $message);
-								}
-							}
-							else {
-								$new_errors->add($code, $message);
-							}
-						}
-						else {
-							// Restore other username errors
-							$new_errors->add($code, $message);
-						}
-					}
-				}
-				else {
-					// Restore any other errors
-					foreach ($messages as $message) {
-						$new_errors->add($code, $message);
-					}
-				}
-			}
-		} else if (!is_super_admin() && !$this->allowed_email_domain($_REQUEST[ 'user_login' ])) {
-			$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
-			$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
-			$allowed_domains_db = str_replace(',', '/', $allowed_domains_db);
-
-			$error_message = stripslashes($this->network_settings['cun_settings']['cun_settings_username_error']);
-			if(empty($error_message)) {
-				$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';	
-			}
-			else {
-				$message = $error_message;
-			}
-
-			$new_errors->add($code, $message);
-
-		} else {
-			return $result;
-		}
-
-		$result['errors'] = $new_errors;
-
-		return $result;
-	}
-
-	/*
-	 * Email addresses can contain characters not allowed in the strict set,
-	 * such as '+'.
-	 */
-	function sanitize_username($username, $raw_username, $strict) {
-		if (is_email($raw_username)) {
-			$username = $raw_username;
-		}
-
-		return $username;
-	}
-
 
 
     /**
