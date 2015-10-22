@@ -12,13 +12,13 @@
  * @license GNU General Public License (Version 2 - GPLv2) {@link http://www.gnu.org/licenses/gpl-2.0.html}
  *
  * @wordpress-plugin
- * Plugin Name: Custom New User Page
+ * Plugin Name: Custom Add User
  * Description: Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
  * Plugin URI: http://github.com/sanghviharshit
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
  * License: GPL2
- * Version: 0.1.4
+ * Version: 0.1.6
  */
 
 // If this file is called directly, abort.
@@ -56,6 +56,7 @@ class Custom_User_New {
      */
     function __construct() {
         
+
         $this->init_vars();
         $this->init();
     }
@@ -72,8 +73,7 @@ class Custom_User_New {
         add_action( 'user_new_form', array( $this , 'custom_content_below_add_user_form' ) );
         add_action( 'admin_action_createuser', array( $this , 'custom_createuser' ) );
         add_action( 'admin_action_adduser', array( $this , 'custom_adduser' ) );
-
-        add_filter( 'wpmu_validate_user_signup', array($this, 'validate_username'));
+        add_filter( 'wpmu_validate_user_signup', array($this, 'hs2619_validate_username'));
     }
 
     /**
@@ -117,7 +117,7 @@ class Custom_User_New {
     }
 
     /**
-     * Add Google Analytics options page.
+     * Add Custom Add User options page.
      * 
      * @return void
      */
@@ -154,7 +154,7 @@ class Custom_User_New {
      * @return void
      */
     function network_admin_menu() {
-        add_submenu_page( 'settings.php', 'Custom New User', 'Custom New User', 'manage_network', 'custom-user-new-settings', array( $this, 'output_network_settings_page' ) );
+        add_submenu_page( 'settings.php', 'Add User Instructions', 'Add User Instructions', 'manage_network', 'custom-user-new-settings', array( $this, 'output_network_settings_page' ) );
     }
 
     /**
@@ -176,28 +176,9 @@ class Custom_User_New {
         require_once( $this->plugin_dir . "includes/custom-user-new-settings.php" );
     }
 
-    /**
-     * Network add user page
-     *
-     * @access public
-     * @return void
-     */
-    function output_network_user_new_page() {
-        /* Get Network settings */
-        $this->output_user_new_page( 'network' );
-    }
 
     /**
-     * Admin Users->add user page output
-     *
-     * @return void
-     */
-    function output_user_new_page( $network = '' ) {
-        //require_once( $this->plugin_dir . "includes/custom-user-new.php" );
-    }
-
-    /**
-    * Adds Custom text on add users page below add user form.
+    * Adds Custom text on add user page below add user form.
     *
     * @access public
     */
@@ -243,13 +224,13 @@ class Custom_User_New {
             if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
                 $add_user_errors = $user_details[ 'errors' ];
             } else {
-				/**
-				 * Filter the user_login, also known as the username, before it is added to the site.
-				 *
-				 * @since 2.0.3
-				 *
-				 * @param string $user_login The sanitized username.
-				 */
+                /**
+                 * Filter the user_login, also known as the username, before it is added to the site.
+                 *
+                 * @since 2.0.3
+                 *
+                 * @param string $user_login The sanitized username.
+                 */
                 $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
                 
                 add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
@@ -260,8 +241,8 @@ class Custom_User_New {
                 $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
                 wp_redirect( $redirect );
                 exit();
-			}
-    	}
+            }
+        }
     }
 
     /**
@@ -310,32 +291,6 @@ class Custom_User_New {
     }
 
 
-	/**
-     * Check if email address is from allowed domains.
-     *
-     * @return bool
-     */
-    private function allowed_email_domain($email) {
-    	if(!is_email($email)) {
-    		return false;
-		}
-		$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
-		$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
-
-		//Domains not configured, allow all
-		if(empty($allowed_domains_db)) {
-			return true;
-		}
-		$allowed_domains = explode(",", $allowed_domains_db);
-		
-		$domain_in_email = strtolower(array_pop(explode('@', $email)));
-		
-		if ( ! in_array($domain_in_email, $allowed_domains)) {
-			return false;
-		}
-		return true;
-
-    }
     /**
      * Update Custom New User plugin settings into DB.
      *
@@ -362,98 +317,68 @@ class Custom_User_New {
         }
     }
 
+    /*
+     * Override WordPress add user validation by allowing
+     * only email addresses with username as the first part of the email address.
+     * Allow minimum of 3 characters for username field instead of WordPress default of 4.
+     * e.g. allow: username hs2619 and email address hs2619@nyu.edu (displaying error for harshit@nyu.edu)
+     */
+    function hs2619_validate_username($result) {
 
-	/*
-	 * Override errors generated by WordPress due to network username
-	 * restrictions that are sort of insane.
-	 */
-	function validate_username($result) {
+        if (! is_wp_error($result['errors'])) {
+            return $result;
+        }
 
-		$username = $result['user_name'];
+        $username = $result['user_name'];
 
-		// Copy any error messages that have not been overridden
-		$new_errors = new WP_Error();
+        // Copy any error messages that have not been overridden
+        $new_errors = new WP_Error();
 
-		if(is_wp_error( $result[ 'errors' ] ) && !empty( $result[ 'errors' ]->errors )) {
-			$errors = $result['errors'];
-			$codes = $errors->get_error_codes();
+        $errors = $result['errors'];
+        $codes = $errors->get_error_codes();
 
-			foreach ($codes as $code) {
-				$messages = $errors->get_error_messages($code);
+        foreach ($codes as $code) {
+            $messages = $errors->get_error_messages($code);
 
-				if ($code == 'user_name') {
-					foreach ($messages as $message) {
-						if ($message == __('Only lowercase letters (a-z) and numbers are allowed.')) {
-							if (is_email($username)) {
-								if(!is_super_admin() && !$this->allowed_email_domain($_REQUEST[ 'user_login' ])) {
-									$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
-									$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
-									$allowed_domains_db = str_replace(',', '/', $allowed_domains_db);
+            if ($code == 'user_name') {
+                foreach ($messages as $message) {
+                    if ($message == __('Username must be at least 4 characters.')) {
+                        // Check the username length
 
-									$error_message = stripslashes($this->network_settings['cun_settings']['cun_settings_username_error']);
-									if(empty($error_message)) {
-										$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';	
-									}
-									else {
-										$message = $error_message;
-									}
-									$new_errors->add($code, $message);
-								}
-							}
-							else {
-								$new_errors->add($code, $message);
-							}
-						}
-						else {
-							// Restore other username errors
-							$new_errors->add($code, $message);
-						}
-					}
-				}
-				else {
-					// Restore any other errors
-					foreach ($messages as $message) {
-						$new_errors->add($code, $message);
-					}
-				}
-			}
-		} else if (!is_super_admin() && !$this->allowed_email_domain($_REQUEST[ 'user_login' ])) {
-			$allowed_domains_db = stripslashes($this->network_settings['cun_settings']['cun_settings_username_domain']);
-			$allowed_domains_db = strtolower(str_replace(' ', '', $allowed_domains_db));
-			$allowed_domains_db = str_replace(',', '/', $allowed_domains_db);
+                        if (strlen($username) < 3) {
+                            $new_errors->add($code, $message);
+                        }
+                    }
+                    else {
+                        // Restore other username errors
+                        $new_errors->add($code, $message);
+                    }
+                }
+            }
+            else {
+                // Restore any other errors
+                foreach ($messages as $message) {
+                    $new_errors->add($code, $message);
+                }
+            }
+        }
 
-			$error_message = stripslashes($this->network_settings['cun_settings']['cun_settings_username_error']);
-			if(empty($error_message)) {
-				$message = 'Sorry, Username must be ' .$allowed_domains_db. ' email address.';	
-			}
-			else {
-				$message = $error_message;
-			}
+        $user_name = $result['user_name'];
+        $user_email = $result['user_email'];
+        $parts = explode("@", $user_email);
+        $user_name_from_email = $parts[0];
 
-			$new_errors->add($code, $message);
+        if(strcasecmp($user_name, $user_name_from_email) != 0 && !is_super_admin()) {
+            $code = 'user_name';
+            $message = 'User name and email address has to use NYU NetID.';
+            $new_errors->add($code, $message);
+            $result['errors'] = $new_errors;
+        }
 
-		} else {
-			return $result;
-		}
+        $result['errors'] = $new_errors;
 
-		$result['errors'] = $new_errors;
-
-		return $result;
-	}
-
-	/*
-	 * Email addresses can contain characters not allowed in the strict set,
-	 * such as '+'.
-	 */
-	function sanitize_username($username, $raw_username, $strict) {
-		if (is_email($raw_username)) {
-			$username = $raw_username;
-		}
-
-		return $username;
-	}
-
-
+        return $result;
+    }
 
     /**
      * Save plugin options.
