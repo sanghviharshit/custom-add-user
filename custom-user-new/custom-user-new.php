@@ -12,13 +12,13 @@
  * @license GNU General Public License (Version 2 - GPLv2) {@link http://www.gnu.org/licenses/gpl-2.0.html}
  *
  * @wordpress-plugin
- * Plugin Name: Custom New User Page
+ * Plugin Name: Custom Add User
  * Description: Allows adding users without sending an email confirmation to new users. Also adds custom text below add user form.
  * Plugin URI: http://github.com/sanghviharshit
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
  * License: GPL2
- * Version: 0.1.5
+ * Version: 0.1.6
  */
 
 // If this file is called directly, abort.
@@ -368,7 +368,7 @@ class Custom_User_New {
         $parts = explode("@", $user_email);
         $user_name_from_email = $parts[0];
 
-        if(strcasecmp($user_name, $user_name_from_email) != 0) {
+        if(strcasecmp($user_name, $user_name_from_email) != 0 && !is_super_admin()) {
             $code = 'user_name';
             $message = 'User name and email address has to use NYU NetID.';
             $new_errors->add($code, $message);
