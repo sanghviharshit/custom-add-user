@@ -46,28 +46,6 @@
 
                     </table>
 
-                    <h3 class="title nse-playlist-settings"><?php _e( 'Username Override Settings.', $this->text_domain ) ?></h3>
-
-                    <table class="form-table cun-settings-username">
-
-                        <tr class="cun-settings-username" valign="top">
-                            <th scope="row"><?php _e( 'Domains for Email Address', $this->text_domain ); ?></th>
-                            <td>
-                                <input type="text" name="cun_settings_username_domain" class="regular-text" <?php if ( !empty( $this->current_settings['cun_settings']['cun_settings_username_domain'] ) ) { echo "value='".strtolower(stripslashes($this->current_settings['cun_settings']['cun_settings_username_domain']))."'"; } ?> />
-                                <p class="description"><?php _e( 'Comma-separated list of allowed domains for email-id as username. e.g. nyu.edu, poly.edu', $this->text_domain ); ?></p>
-                            </td>
-                        </tr>
-
-                        <tr class="cun-settings-username-error" valign="top">
-                            <th scope="row"><?php _e( 'Error message for invalid username.', $this->text_domain ); ?></th>
-                            <td>
-                                <input type="text" name="cun_settings_username_error" class="regular-text" <?php if ( !empty( $this->current_settings['cun_settings']['cun_settings_username_error'] ) ) { echo "value='".strtolower(stripslashes($this->current_settings['cun_settings']['cun_settings_username_error']))."'"; } ?> />
-                                <p class="description"><?php _e( 'Error message that should be displayed to admin when invalid username is entered', $this->text_domain ); ?></p>
-                            </td>
-                        </tr>
-
-                    </table>
-
                     <p class="submit">
                         <?php wp_nonce_field('cun_submit_settings_network'); ?>
                         <input type="submit" name="submit" class="button-primary" value="<?php _e( 'Save Changes', $this->text_domain ); ?>" />
