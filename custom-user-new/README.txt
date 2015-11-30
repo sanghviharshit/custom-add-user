@@ -3,7 +3,7 @@ Donate link: https://github.com/sanghviharshit/
 Tags: custom, user, new, existing, add, promote
 Requires at least: 3.0.1
 Tested up to: 4.1
-Stable tag: 0.1.6
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,9 @@ Not yet available.
 
 == Changelog ==
 
+= 1.0.0 =
+* Merged Add new and existing user form.
+
 = 0.1.6 =
 * Updated validate user function.
 
@@ -86,6 +89,9 @@ Not yet available.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.0 =
+* Merge Add new and existing user form.
 
 = 0.1.4 =
 * Add existing user without confirmation.

@@ -1,10 +1,6 @@
 <?php
 /**
- * The plugin bootstrap file
- *
- * This file is read by WordPress to generate the plugin information in the plugin
- * Dashboard. This file also includes all of the dependencies used by the plugin,
- * and defines a function that starts the plugin.
+ * Custom Add User Page for NYU's WP Service.
  *
  * @link http://about.me/harshit
  * @package Custom-User-New
@@ -18,7 +14,7 @@
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
  * License: GPL2
- * Version: 0.1.6
+ * Version: 1.0.0
  */
 
 // If this file is called directly, abort.
@@ -219,28 +215,37 @@ class Custom_User_New {
                 die();
             }
         } else {
-            // Adding a new user to this site
-            $user_details = wpmu_validate_user_signup( $_REQUEST[ 'user_login' ], $_REQUEST[ 'email' ] );
-            if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
-                $add_user_errors = $user_details[ 'errors' ];
-            } else {
-                /**
-                 * Filter the user_login, also known as the username, before it is added to the site.
-                 *
-                 * @since 2.0.3
-                 *
-                 * @param string $user_login The sanitized username.
-                 */
-                $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
-                
-                add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
+            
+            /* Check if user already exists in the network */
+            $user_details = get_user_by('login', $_REQUEST[ 'user_login' ]);
 
-                wpmu_signup_user( $new_user_login, $_REQUEST[ 'email' ], array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
-                $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
-                wpmu_activate_signup( $key );
+            if ( !$user_details ) {
+                // Adding a new user to this site
+                $user_details = wpmu_validate_user_signup( $_REQUEST[ 'user_login' ], $_REQUEST[ 'email' ] );
+                if ( is_wp_error( $user_details[ 'errors' ] ) && !empty( $user_details[ 'errors' ]->errors ) ) {
+                    $add_user_errors = $user_details[ 'errors' ];
+                } else {
+                    $new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
+                    
+                    add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
+
+                    wpmu_signup_user( $new_user_login, $_REQUEST[ 'email' ], array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
+                    $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
+                    wpmu_activate_signup( $key );
+                    $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
+                    wp_redirect( $redirect );
+                    die();
+                }
+            } else {
+                //Add existing user to the blog.
+                $new_user_email = $user_details->user_email;
+                $redirect = 'user-new.php';
+                $username = $user_details->user_login;
+                $user_id = $user_details->ID;
+                add_existing_user_to_blog( array( 'user_id' => $user_id, 'role' => $_REQUEST[ 'role' ] ) );
                 $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
                 wp_redirect( $redirect );
-                exit();
+                die();
             }
         }
     }
@@ -280,12 +285,8 @@ class Custom_User_New {
         $redirect = 'user-new.php';
         $username = $user_details->user_login;
         $user_id = $user_details->ID;
-        if ( ( $username != null && !is_super_admin( $user_id ) ) && ( array_key_exists($blog_id, get_blogs_of_user($user_id)) ) ) {
-            $redirect = add_query_arg( array('update' => 'addexisting'), 'user-new.php' );
-        } else {
-            add_existing_user_to_blog( array( 'user_id' => $user_id, 'role' => $_REQUEST[ 'role' ] ) );
-            $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
-        }
+        add_existing_user_to_blog( array( 'user_id' => $user_id, 'role' => $_REQUEST[ 'role' ] ) );
+        $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
         wp_redirect( $redirect );
         die();
     }
@@ -317,11 +318,13 @@ class Custom_User_New {
         }
     }
 
+
     /*
      * Override WordPress add user validation by allowing
      * only email addresses with username as the first part of the email address.
      * Allow minimum of 3 characters for username field instead of WordPress default of 4.
      * e.g. allow: username hs2619 and email address hs2619@nyu.edu (displaying error for harshit@nyu.edu)
+     Sorry, that username already exists!
      */
     function hs2619_validate_username($result) {
 
@@ -372,7 +375,6 @@ class Custom_User_New {
             $code = 'user_name';
             $message = 'User name and email address has to use NYU NetID.';
             $new_errors->add($code, $message);
-            $result['errors'] = $new_errors;
         }
 
         $result['errors'] = $new_errors;

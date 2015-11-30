@@ -1,6 +1,6 @@
 # Changelog
 
-
+* (30 November 2015). Merged Add new and existing user forms.
 * (16 June 2015). Cleaned up obsolete code.
 * (09 February 2015). Add existing user without confirmation.
 * (29 January 2015). Configurable error message.
