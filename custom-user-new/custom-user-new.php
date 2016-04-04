@@ -14,7 +14,7 @@
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://about.me/harshit
  * License: GPL2
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 // If this file is called directly, abort.
@@ -67,6 +67,7 @@ class Custom_User_New {
         //add_action( 'admin_menu', array( $this, 'admin_menu' ) );
         add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ) );
         add_action( 'user_new_form', array( $this , 'custom_content_below_add_user_form' ) );
+	add_action( 'in_admin_footer', array( $this, 'maybe_add_import_users_from_csv_form' ) );
         add_action( 'admin_action_createuser', array( $this , 'custom_createuser' ) );
         add_action( 'admin_action_adduser', array( $this , 'custom_adduser' ) );
         add_filter( 'wpmu_validate_user_signup', array($this, 'hs2619_validate_username'));
@@ -188,6 +189,39 @@ class Custom_User_New {
         echo $cun_instructions;
     } 
 
+    /**
+     * If the current site is running import-users-from-csv, insert its form on user-new.php.
+     */
+    public function maybe_add_import_users_from_csv_form() {
+	global $pagenow;
+
+	if ( 'user-new.php' !== $pagenow || ! current_user_can( 'create_users' ) ) {
+		return;
+	}
+
+	// If import-users-from-csv is not active, there's nothing to do.
+	if ( ! class_exists( 'IS_IU_Import_Users' ) || ! method_exists( 'IS_IU_Import_Users', 'users_page' ) ) {
+		return;
+	}
+
+	ob_start();
+	IS_IU_Import_Users::users_page();
+	$page = ob_get_clean();
+
+	// Clean up and hide the form. It'll be shown via JS, after being moved in the DOM.
+	$page = str_replace( '<div class="wrap">', '', $page ); // missing the trailing </div>
+	$page = preg_replace( '/action="[^"]*"/', 'action="' . admin_url( 'users.php?page=import-users-from-csv' ) . '"', $page );
+	$page = '<div id="import-users-from-csv" style="display:none;">' . $page . '</div>';
+	echo $page;
+
+	?>
+	<script type="text/javascript">
+	jQuery( document).ready( function($) {
+		$( '#import-users-from-csv' ).insertAfter( '#createuser' ).show();
+	}(jQuery) );
+	</script>
+	<?php
+    }
 
     /**
     * Creates user without email confirmation.
