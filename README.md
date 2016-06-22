@@ -1,4 +1,4 @@
-# WP-Custom-New-User
+# Custom Add User
 This **WordPress plugin** provides completely customized experience for adding users with a **single form** for adding brand `new users` (single site or multisite installs) or `existing users` (in multisite). The users can be added without them requiring `account activation` (which is useful in private multisites where authentication is handled by third party systems such as Shibboleth/ LDAP). It also allows you to add `custom instructions` for adding users to your site.
 
 ## Use cases
