@@ -238,7 +238,7 @@ class Custom_Add_User {
                     add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
                     /* Not Disabling the welcome email */
                     //add_filter( 'wpmu_welcome_user_notification', '__return_false' ); // Disable welcome email
-                    wpmu_signup_user( $new_user_login, new_user_email, array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
+                    wpmu_signup_user( $new_user_login, $new_user_email, array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
                     $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
                     wpmu_activate_signup( $key );
                     $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
