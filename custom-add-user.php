@@ -14,7 +14,7 @@
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://sanghviharshit.com
  * License: GPL3
- * Version: 2.0.0
+ * Version: 2.0.1
  */
 
 // If this file is called directly, abort.
@@ -92,8 +92,8 @@ class Custom_Add_User {
      */
     function init() {
         
-        /* Handle form submission only on user-new.php */
-        add_action( 'load-user-new.php', array( $this, 'handle_page_requests' ) );
+        /* Handle form from settings page */
+        add_action( 'admin_init', array( $this, 'handle_page_requests' ) );
         /* Load Custom CSS only on user-new.php */
         add_action( 'load-user-new.php', array($this, 'load_css' ) );
         /* Create Admin menu */
@@ -238,7 +238,7 @@ class Custom_Add_User {
                     add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
                     /* Not Disabling the welcome email */
                     //add_filter( 'wpmu_welcome_user_notification', '__return_false' ); // Disable welcome email
-                    wpmu_signup_user( $new_user_login, new_user_email, array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
+                    wpmu_signup_user( $new_user_login, $new_user_email, array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
                     $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
                     wpmu_activate_signup( $key );
                     $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
@@ -309,7 +309,6 @@ class Custom_Add_User {
      */
     function handle_page_requests() {
         if ( isset( $_POST['submit'] ) ) {
-
             if ( wp_verify_nonce( $_POST['_wpnonce'], 'cau_submit_settings_network' ) ) {
             //save network settings
                 $this->save_options( array('cau_settings' => $_POST), 'network' );
