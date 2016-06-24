@@ -24,24 +24,23 @@ This plugin addresses all the above issues by -
 #### From your WordPress dashboard
 1. Visit 'Plugins > Add New'
 2. Search for 'Custom Add User'
-3. Activate or Network Activate (multisite) 'Custom Add User' from your Plugins page.
+3. **Activate** or **Network Activate** (multisite) 'Custom Add User' from your Plugins page.
 
 #### From WordPress.org
 1. Download 'custom-add-new'.
 2. Upload the 'custom-user-new' directory to your '/wp-content/plugins/' directory, using your favorite method (ftp, sftp, scp, etc...)
-3. Activate or Network Activate (multisite) *Custom Add User* from your Plugins page.
+3. **Activate** or **Network Activate** (multisite) 'Custom Add User' from your Plugins page.
 
 #### Installing a zip file
 1. Create a zip of `custom-user-new` directory.
 2. In the WordPress dashboard, navigate to the *Plugins* -> *Add New* page.
 3. Click Upload Plugin.
 4. Upload the zip file and click Install Now.
-5. Click on *Activate* or *Network Activate* (multisite).
+3. **Activate** or **Network Activate** (multisite) 'Custom Add User' from your Plugins page.
 
 #### Copying a Directory
 1. Copy the `custom-user-new` directory into your `wp-content/plugins` directory.
 2. In the WordPress Network Admin dashboard, navigate to the *Plugins* page
-3. Locate the menu item that reads “Custom New User Page"
-4. Click on *Activate* or *Network Activate*  (multisite).
+3. **Activate** or **Network Activate** (multisite) 'Custom Add User' from your Plugins page.
 
 

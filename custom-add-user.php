@@ -92,8 +92,8 @@ class Custom_Add_User {
      */
     function init() {
         
-        /* Handle form submission only on user-new.php */
-        add_action( 'load-user-new.php', array( $this, 'handle_page_requests' ) );
+        /* Handle form from settings page */
+        add_action( 'admin_init', array( $this, 'handle_page_requests' ) );
         /* Load Custom CSS only on user-new.php */
         add_action( 'load-user-new.php', array($this, 'load_css' ) );
         /* Create Admin menu */
@@ -309,7 +309,6 @@ class Custom_Add_User {
      */
     function handle_page_requests() {
         if ( isset( $_POST['submit'] ) ) {
-
             if ( wp_verify_nonce( $_POST['_wpnonce'], 'cau_submit_settings_network' ) ) {
             //save network settings
                 $this->save_options( array('cau_settings' => $_POST), 'network' );
