@@ -213,19 +213,20 @@ class Custom_Add_User {
             
             /* Check if user already exists in the network */
             $user_details = null;
-            $user_email = wp_unslash( $_REQUEST['email'] );
-            if ( false !== strpos( $user_email, '@' ) ) {
-                $user_details = get_user_by( 'email', $user_email );
-            } else {
-                if ( is_super_admin() ) {
-                    $user_details = get_user_by( 'login', $user_email );
-                } else {
-                    wp_redirect( add_query_arg( array('update' => 'enter_email'), 'user-new.php' ) );
-                    die();
-                }
-            }
-
+            
+            /* Find user by user_login instead of email */
+            $user_login = wp_unslash( $_REQUEST['user_login'] );
+            //$user_email = wp_unslash( $_REQUEST['email'] );
+            $user_details = get_user_by( 'login', $user_login );
+            
             if ( !$user_details ) {
+            	if ( ! current_user_can( 'create_users' ) ) {
+					wp_die(
+						'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
+						'<p>' . __( 'Sorry, you are not allowed to create users.' ) . '</p>',
+						403
+					);
+				}
                 // Adding a new user to this site
                 $new_user_email = wp_unslash( $_REQUEST['email'] );
                 $user_details = wpmu_validate_user_signup( $_REQUEST['user_login'], $new_user_email );
@@ -240,13 +241,24 @@ class Custom_Add_User {
                     //add_filter( 'wpmu_welcome_user_notification', '__return_false' ); // Disable welcome email
                     wpmu_signup_user( $new_user_login, $new_user_email, array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST[ 'role' ] ) );
                     $key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $_REQUEST[ 'email' ] ) );
-                    wpmu_activate_signup( $key );
-                    $redirect = add_query_arg( array('update' => 'addnoconfirmation'), 'user-new.php' );
-                    wp_redirect( $redirect );
+                    $new_user = wpmu_activate_signup( $key );
+					if ( is_wp_error( $new_user ) ) {
+						$redirect = add_query_arg( array( 'update' => 'addnoconfirmation' ), 'user-new.php' );
+					} else {
+						$redirect = add_query_arg( array( 'update' => 'addnoconfirmation', 'user_id' => $new_user['user_id'] ), 'user-new.php' );
+					}
+					wp_redirect( $redirect );
                     die();
                 }
             } else {
-                //Add existing user to the blog.
+				if ( ! current_user_can( 'promote_user', $user_details->ID ) ) {
+					wp_die(
+						'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
+						'<p>' . __( 'Sorry, you are not allowed to add users to this network.' ) . '</p>',
+						403
+					);
+				}
+                //Adding an existing user to this blog
                 $new_user_email = $user_details->user_email;
                 $redirect = 'user-new.php';
                 $username = $user_details->user_login;
