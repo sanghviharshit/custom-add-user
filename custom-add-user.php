@@ -14,7 +14,7 @@
  * Author: Harshit Sanghvi <sanghvi.harshit@gmail.com>
  * Author URI:        http://sanghviharshit.com
  * License: GPL3
- * Version: 2.0.2
+ * Version: 2.0.3
  */
 
 // If this file is called directly, abort.
@@ -47,6 +47,8 @@ class Custom_Add_User {
     var $network_settings;
     /** @var array $settings The plugin network or site options depending on localization in admin page */
     var $current_settings;
+    /** @var string $version The plugin version */
+    var $version = '2.0.3';
 
 
     /**
@@ -192,9 +194,12 @@ class Custom_Add_User {
     public function custom_createuser() {
         global $wpdb;
         check_admin_referer( 'create-user', '_wpnonce_create-user' );
-
-        if ( ! current_user_can('create_users') )
-            wp_die(__('Cheatin&#8217; uh?'));
+		
+		$permission = apply_filters('custom_add_user_permission',current_user_can( 'create_users' ));
+		$error_msg 	= apply_filters('custom_add_user_error_msg',__('Cheatin&#8217; uh?'));
+		
+        if ( ! $permission )
+            wp_die($error_msg);
 
         if ( ! is_multisite() ) {
             $user_id = edit_user();
@@ -220,9 +225,9 @@ class Custom_Add_User {
             $user_details = get_user_by( 'login', $user_login );
             
             if ( !$user_details ) {
-            	if ( ! current_user_can( 'create_users' ) ) {
+            	if ( ! $permission ) {
 					wp_die(
-						'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
+						'<h1>' . $error_msg . '</h1>' .
 						'<p>' . __( 'Sorry, you are not allowed to create users.' ) . '</p>',
 						403
 					);
@@ -253,7 +258,7 @@ class Custom_Add_User {
             } else {
 				if ( ! current_user_can( 'promote_user', $user_details->ID ) ) {
 					wp_die(
-						'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
+						'<h1>' . $error_msg . '</h1>' .
 						'<p>' . __( 'Sorry, you are not allowed to add users to this network.' ) . '</p>',
 						403
 					);
@@ -298,9 +303,12 @@ class Custom_Add_User {
             wp_redirect( add_query_arg( array('update' => 'does_not_exist'), 'user-new.php' ) );
             die();
         }
+		
+		$permission = apply_filters('custom_add_user_permission',current_user_can('promote_user', $user_details->ID));
+		$error_msg 	= apply_filters('custom_add_user_error_msg',__('Cheatin&#8217; uh?'));
 
-        if ( ! current_user_can('promote_user', $user_details->ID) )
-            wp_die(__('Cheatin&#8217; uh?'));
+        if ( ! $permission )
+            wp_die($error_msg);
 
         // Adding an existing user to this blog
         $new_user_email = $user_details->user_email;
