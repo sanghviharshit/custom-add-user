@@ -43,4 +43,23 @@ This plugin addresses all the above issues by -
 2. In the WordPress Network Admin dashboard, navigate to the *Plugins* page
 3. **Activate** or **Network Activate** (multisite) 'Custom Add User' from your Plugins page.
 
+## Hooks
 
+#### FILTER: custom_add_user_permission
+
+**function prevent_user_registration($permission){
+	//put a limit to add user
+	if(count_users > 10){ 
+		return false;
+	}
+	return $permission;
+}
+add_filter('custom_add_user_permission','prevent_user_registration', 10, 1 );**
+
+#### FILTER: custom_add_user_error_msg
+
+**function message_add_user($msg){
+	$msg = _('An error occurred. Please try again.');
+	return $msg;
+}
+add_filter('custom_add_user_error_msg', 'message_add_user', 10, 1 );**
